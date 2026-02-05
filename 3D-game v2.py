@@ -2,11 +2,12 @@
 #Move around with W A S D
 #Look around with left/right arrows
 #Press "k" to stop
+#Now with textures!
 
 import time
-import turtle
 import math
 import keyboard
+import pygame
 
 rayDis = []
 screenW = 1300
@@ -18,21 +19,29 @@ s = 0.1
 rayS = 0.01
 desiredPlayerY = playerY
 desiredPlayerX = playerX
-r, g, b = 0, 0, 0.8
+r, g, b = 0, 0, 204
 fov = 60
 numRays = screenW//10
 
-turtle.clear()
-turtle.setup(width=screenW, height=screenH)
-turtle.color(r, g, b)
-turtle.speed(0)
-turtle.hideturtle()
-turtle.pensize(1)
-turtle.tracer(0)
-turtle.penup()
+
+pygame.init()
+screen = pygame.display.set_mode((screenW, screenH))
+clock = pygame.time.Clock()
+
+
+wallTex = [[0, 0, 0, 1, 0, 0, 1, 0, 0, 0],
+           [0, 0, 0, 1, 0, 0, 1, 0, 0, 0],
+           [0, 0, 0, 1, 0, 0, 1, 0, 0, 0],
+           [0, 0, 0, 1, 1, 1, 1, 0, 0, 0],
+           [0, 0, 0, 1, 0, 0, 1, 0, 0, 0],
+           [0, 0, 0, 1, 0, 0, 1, 0, 0, 0],
+           [0, 0, 0, 1, 1, 1, 1, 0, 0, 0],
+           [0, 0, 0, 1, 0, 0, 1, 0, 0, 0],
+           [0, 0, 0, 1, 0, 0, 1, 0, 0, 0],
+           [0, 0, 0, 1, 0, 0, 1, 0, 0, 0]]
+
 
 #The map to generate 1 is a wall and 0 is nothing
-
 map = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
        [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
        [1, 0, 0, 1, 0, 0, 0, 1, 0, 1],
@@ -43,20 +52,6 @@ map = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
        [1, 0, 1, 0, 0, 0, 0, 1, 0, 1],
        [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]
-
-#Function to help draw map
-
-def Square():
-    turtle.penup()
-    turtle.goto(turtle.xcor() + 25, turtle.ycor() + 25)
-    turtle.setheading(-90)
-    turtle.pendown()
-    turtle.begin_fill()
-    for n in range(4):
-        turtle.forward(50)
-        turtle.right(90)
-    turtle.end_fill()
-    turtle.penup()
 
 #Raycast function
 
@@ -81,13 +76,15 @@ def SendRay(x, y, heading):
     elif alpha <= -180:
         alpha += 360
     if map[round(rayY + desiredRayY)][round(rayX)] == 1:
+        wallPer = rayY - math.floor(rayY)
         if -90 < heading <= 90:
             tone = 1
         else:
             tone = 0.5
     elif map[round(rayY)][round(rayX + desiredRayX)] == 1:
         tone = 0.75
-    rayDis.append([(math.cos(math.radians(alpha)) * (math.sqrt((x - rayX)**2 + (y - rayY)**2))), tone])
+        wallPer = rayX - math.floor(rayX)
+    rayDis.append([(math.cos(math.radians(alpha)) * (math.sqrt((x - rayX)**2 + (y - rayY)**2))), tone, wallPer])
 
 #Collision detection functions for the player
 
@@ -108,27 +105,25 @@ def DrawLine(index, dis):
         size = 1000/dis[0]
     else:
         size = 1000
-    turtle.color(r * dis[1], g * dis[1], b * dis[1])
-    turtle.penup()
-    turtle.setheading(90)
-    turtle.goto((index * 2 - screenW//10)*5 + 5, -size/2)
-    turtle.pendown()
-    turtle.begin_fill()
-    turtle.forward(size)
-    turtle.right(90)
-    turtle.forward(10)
-    turtle.right(90)
-    turtle.forward(size)
-    turtle.right(90)
-    turtle.forward(10)
-    turtle.end_fill()
+    texRow = wallTex[int(10 * dis[2])]
+    for color_index, color in enumerate(texRow):
+        if color == 0:
+            r,g,b = 0, 0,204
+        else:
+            r,g,b = 204,0,0
+        x = index * 10
+        y = screenH / 2 + size / 2 - size / 10 * (color_index + 1)
+        pygame.draw.rect(screen, (r * dis[1] ,g * dis[1] ,b * dis[1] ), (x, y, 10, size/10 + 1))
 
 
 #Main loop, will sleep for 0.05 seconds to reduce lag
 
 while True:
-    turtle.clear()
-    turtle.color(r, g, b)
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            exit()
+    screen.fill((255, 255, 255))
 
     #Rotation
     if keyboard.is_pressed("left_arrow"):
@@ -184,5 +179,5 @@ while True:
 
     for dis_index, dis in enumerate(rayDis):
         DrawLine(dis_index, dis)
-    turtle.update()
+    pygame.display.flip()
     time.sleep(0.05)
