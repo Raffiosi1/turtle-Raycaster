@@ -15,7 +15,7 @@ screenH = 1000
 playerX = 2
 playerY = 2
 playerHeading = 0
-s = 0.1
+s = 0.05
 rayS = 0.01
 desiredPlayerY = playerY
 desiredPlayerX = playerX
@@ -29,16 +29,26 @@ screen = pygame.display.set_mode((screenW, screenH))
 clock = pygame.time.Clock()
 
 
-wallTex = [[0, 0, 0, 1, 0, 0, 1, 0, 0, 0],
-           [0, 0, 0, 1, 0, 0, 1, 0, 0, 0],
-           [0, 0, 0, 1, 0, 0, 1, 0, 0, 0],
-           [0, 0, 0, 1, 1, 1, 1, 0, 0, 0],
-           [0, 0, 0, 1, 0, 0, 1, 0, 0, 0],
-           [0, 0, 0, 1, 0, 0, 1, 0, 0, 0],
-           [0, 0, 0, 1, 1, 1, 1, 0, 0, 0],
-           [0, 0, 0, 1, 0, 0, 1, 0, 0, 0],
-           [0, 0, 0, 1, 0, 0, 1, 0, 0, 0],
-           [0, 0, 0, 1, 0, 0, 1, 0, 0, 0]]
+wallTex = [[1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1],
+           [0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0],
+           [0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0],
+           [0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0],
+           [1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1],
+           [0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0],
+           [0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0],
+           [0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0],
+           [1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1],
+           [0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0],
+           [0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0],
+           [0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0],
+           [1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1],
+           [0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0],
+           [0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0],
+           [0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0],
+           [1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1],
+           [0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0],
+           [0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0],
+           [0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0]]
 
 
 #The map to generate 1 is a wall and 0 is nothing
@@ -76,14 +86,14 @@ def SendRay(x, y, heading):
     elif alpha <= -180:
         alpha += 360
     if map[round(rayY + desiredRayY)][round(rayX)] == 1:
-        wallPer = rayY - math.floor(rayY)
+        wallPer = rayX - math.floor(rayX)
         if -90 < heading <= 90:
             tone = 1
         else:
             tone = 0.5
     elif map[round(rayY)][round(rayX + desiredRayX)] == 1:
         tone = 0.75
-        wallPer = rayX - math.floor(rayX)
+        wallPer = rayY - math.floor(rayY)
     rayDis.append([(math.cos(math.radians(alpha)) * (math.sqrt((x - rayX)**2 + (y - rayY)**2))), tone, wallPer])
 
 #Collision detection functions for the player
@@ -105,15 +115,15 @@ def DrawLine(index, dis):
         size = 1000/dis[0]
     else:
         size = 1000
-    texRow = wallTex[int(10 * dis[2])]
+    texRow = wallTex[int(20 * dis[2])]
     for color_index, color in enumerate(texRow):
         if color == 0:
-            r,g,b = 0, 0,204
+            r,g,b = 126, 47, 8
         else:
-            r,g,b = 204,0,0
+            r,g,b = 145 ,145 ,145
         x = index * 10
-        y = screenH / 2 + size / 2 - size / 10 * (color_index + 1)
-        pygame.draw.rect(screen, (r * dis[1] ,g * dis[1] ,b * dis[1] ), (x, y, 10, size/10 + 1))
+        y = screenH / 2 + size / 2 - size / 20 * (color_index + 1)
+        pygame.draw.rect(screen, (r * dis[1] ,g * dis[1] ,b * dis[1] ), (x, y, 10, size/20 + 1))
 
 
 #Main loop, will sleep for 0.05 seconds to reduce lag
@@ -123,13 +133,13 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
-    screen.fill((255, 255, 255))
+    screen.fill((190, 190, 190))
 
     #Rotation
     if keyboard.is_pressed("left_arrow"):
-        playerHeading -= 5
+        playerHeading -= 3
     if keyboard.is_pressed("right_arrow"):
-        playerHeading += 5
+        playerHeading += 3
     
     if playerHeading > 180:
         playerHeading -= 360
@@ -180,4 +190,4 @@ while True:
     for dis_index, dis in enumerate(rayDis):
         DrawLine(dis_index, dis)
     pygame.display.flip()
-    time.sleep(0.05)
+    time.sleep(0.02)
